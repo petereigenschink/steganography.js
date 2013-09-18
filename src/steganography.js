@@ -6,276 +6,280 @@
  * and the Beerware (http://en.wikipedia.org/wiki/Beerware) license.
  */
 (function(g) {
-	var util = {
-		"isPrime" : function(n) {
-			if (isNaN(n) || !isFinite(n) || n%1 || n<2) return false;
-			if (n%2==0) return (n==2);
-			if (n%3==0) return (n==3);
-			var m=Math.sqrt(n);
-			for (var i=5;i<=m;i+=6) {
-				if (n%i==0) return false;
-				if (n%(i+2)==0) return false;
-			}
-			return true;
-		},
-		"findNextPrime" : function(n) {
-			for(var i=n; true; i+=1)
-				if(util.isPrime(i)) return i;
-		},
-		"sum" : function(func, end, options) {
-			var sum = 0;
-			options = options || {};
-			for(var i = options.start || 0; i < end; i+=(options.inc||1))
-				sum += func(i) || 0;
+  var util = {
+    "isPrime" : function(n) {
+      if (isNaN(n) || !isFinite(n) || n%1 || n<2) return false;
+      if (n%2==0) return (n==2);
+      if (n%3==0) return (n==3);
+      var m=Math.sqrt(n);
+      for (var i=5;i<=m;i+=6) {
+        if (n%i==0) return false;
+        if (n%(i+2)==0) return false;
+      }
+      return true;
+    },
+    "findNextPrime" : function(n) {
+      for(var i=n; true; i+=1)
+        if(util.isPrime(i)) return i;
+    },
+    "sum" : function(func, end, options) {
+      var sum = 0;
+      options = options || {};
+      for(var i = options.start || 0; i < end; i+=(options.inc||1))
+        sum += func(i) || 0;
 
-			return (sum === 0 && options.defValue ? options.defValue : sum);
-		},
-		"product" : function(func, end, options) {
-			var prod = 1;
-			options = options || {};
-			for(var i = options.start || 0; i < end; i+=(options.inc||1))
-				prod *= func(i) || 1;
+      return (sum === 0 && options.defValue ? options.defValue : sum);
+    },
+    "product" : function(func, end, options) {
+      var prod = 1;
+      options = options || {};
+      for(var i = options.start || 0; i < end; i+=(options.inc||1))
+        prod *= func(i) || 1;
 
-			return (prod === 1 && options.defValue ? options.defValue : prod);
-		},
-		"createArrayFromArgs" : function(args,index,threshold) {
-			var ret = new Array(threshold-1);
-			for(var i = 0; i < threshold; i+=1)
-				ret[i] = args(i >= index ? i+1:i);
+      return (prod === 1 && options.defValue ? options.defValue : prod);
+    },
+    "createArrayFromArgs" : function(args,index,threshold) {
+      var ret = new Array(threshold-1);
+      for(var i = 0; i < threshold; i+=1)
+        ret[i] = args(i >= index ? i+1:i);
 
-			return ret;
-		}
-	};
-	
-	function Cover() {};
+      return ret;
+    }
+  };
+  
+  function Cover() {};
 
-	Cover.prototype = {
-		"config": {
-			"t": 3,
-			"threshold": 1,
-			"args": function(i) { return i+1; },
-			"messageDelimiter": function(modMessage,threshold) {
-								var delimiter = new Array(threshold*3);
-								for(var i = 0; i < delimiter.length; i+=1)
-									delimiter[i] = 255;
-								
-								return delimiter;
-							},
-			"messageCompleted": function(data, i, threshold) {
-								var done = true;
-								for(var j = 0; j < 16 && done; j+=1) {
-									done = done && (data[i+j*4] === 255);
-								}
-								return done;
-							}
-		},
-		"encode": function(message, image, options) {
-			options = options || {};
-			var config = this.config;
+  Cover.prototype = {
+    "config": {
+      "t": 3,
+      "threshold": 1,
+      "args": function(i) { return i+1; },
+      "messageDelimiter": function(modMessage,threshold) {
+                var delimiter = new Array(threshold*3);
+                for(var i = 0; i < delimiter.length; i+=1)
+                  delimiter[i] = 255;
+                
+                return delimiter;
+              },
+      "messageCompleted": function(data, i, threshold) {
+                var done = true;
+                for(var j = 0; j < 16 && done; j+=1) {
+                  done = done && (data[i+j*4] === 255);
+                }
+                return done;
+              }
+    },
+    "encode": function(message, image, options) {
+      options = options || {};
+      var config = this.config;
 
-			var shadowCanvas = document.createElement('canvas'),
-				shadowCtx = shadowCanvas.getContext('2d');
+      var shadowCanvas = document.createElement('canvas'),
+        shadowCtx = shadowCanvas.getContext('2d');
 
-			shadowCanvas.style.display = 'none';
+      shadowCanvas.style.display = 'none';
 
-			if(image.length) {
-				var dataURL = image;
-				image = new Image();
-				image.src = dataURL;
-			}
-			shadowCanvas.width = options.width || image.width;
-			shadowCanvas.height = options.height || image.height;
-			if(options.height && options.width) {
-				shadowCtx.drawImage(image, 0, 0, options.width, options.height );
-			} else {
-				shadowCtx.drawImage(image, 0, 0);
-			}
-			
+      if(image.length) {
+        var dataURL = image;
+        image = new Image();
+        image.src = dataURL;
+      }
+      shadowCanvas.width = options.width || image.width;
+      shadowCanvas.height = options.height || image.height;
+      if(options.height && options.width) {
+        shadowCtx.drawImage(image, 0, 0, options.width, options.height );
+      } else {
+        shadowCtx.drawImage(image, 0, 0);
+      }
+      
 
-			var imageData = shadowCtx.getImageData(0, 0, shadowCanvas.width, shadowCanvas.height),
-				data = imageData.data;
-			// bundlesPerChar ... Count of full t-bit-sized bundles per Character
-			// overlapping ... Count of bits of the currently handled character which are not handled during each run
-			var t = options.t || config.t,
-				threshold = options.threshold || config.threshold,
-				bundlesPerChar = 16/t >> 0,
-				overlapping = 16%t,
-				messageDelimiter = options.messageDelimiter || config.messageDelimiter,
-				args = options.args || config.args,
-				prime = util.findNextPrime(Math.pow(2,t)),
-				decM, oldDec, oldMask, modMessage = [], left, right;
+      var imageData = shadowCtx.getImageData(0, 0, shadowCanvas.width, shadowCanvas.height),
+        data = imageData.data;
+      // bundlesPerChar ... Count of full t-bit-sized bundles per Character
+      // overlapping ... Count of bits of the currently handled character which are not handled during each run
+      var t = options.t || config.t,
+        threshold = options.threshold || config.threshold,
+        bundlesPerChar = 16/t >> 0,
+        overlapping = 16%t,
+        messageDelimiter = options.messageDelimiter || config.messageDelimiter,
+        args = options.args || config.args,
+        prime = util.findNextPrime(Math.pow(2,t)),
+        decM, oldDec, oldMask, modMessage = [], left, right;
 
-			for(var i=0; i<message.length; i+=1) {
-				// dec ... UTF-16 Unicode of the i-th character of the message
-				// curOverlapping ... The count of the bits of the previous character not handled in the previous run
-				// mask ... The raw initial bitmask, will be changed every run and if bits are overlapping
-				var dec = message.charCodeAt(i), curOverlapping = (overlapping*i)%t, mask;
-				if(curOverlapping > 0 && oldDec) {
-					mask = Math.pow(2,t-curOverlapping) - 1;
-					oldMask = 65536 * (1 - Math.pow(2, -curOverlapping)); // 2^16 * ...
-					left = (dec & mask) << curOverlapping;
-					right = (oldDec & oldMask) >> (bundlesPerChar*t + 1 - curOverlapping);
-					modMessage.push(left+right);
+      for(var i=0; i<message.length; i+=1) {
+        // dec ... UTF-16 Unicode of the i-th character of the message
+        // curOverlapping ... The count of the bits of the previous character not handled in the previous run
+        // mask ... The raw initial bitmask, will be changed every run and if bits are overlapping
+        var dec = message.charCodeAt(i), curOverlapping = (overlapping*i)%t, mask;
+        if(curOverlapping > 0 && oldDec) {
+          mask = Math.pow(2,t-curOverlapping) - 1;
+          oldMask = 65536 * (1 - Math.pow(2, -curOverlapping)); // 2^16 * ...
+          left = (dec & mask) << curOverlapping;
+          right = (oldDec & oldMask) >> (bundlesPerChar*t + 1 - curOverlapping);
+          modMessage.push(left+right);
 
-					mask = Math.pow(2,2*t-curOverlapping) * (1 - Math.pow(2, -t));
-					for(var j=1; j<bundlesPerChar; j+=1) {
-						decM = dec & mask;
-						modMessage.push(decM >> (((j-1)*t)+(t-curOverlapping)));
-						mask <<= t;
-					}
-					if((overlapping*(i+1))%t === 0) {
-						mask = 65536 * (1 - Math.pow(2,-t));
-						decM = dec & mask;
-						modMessage.push(decM >> (((bundlesPerChar-1)*t)+1));
-					}
-					else if(((((overlapping*(i+1))%t) + (t-curOverlapping)) <= t)) {
-						decM = dec & mask;
-						modMessage.push(decM >> (((bundlesPerChar-1)*t)+(t-curOverlapping)));
-					}
-				}
-				else {
-					mask = Math.pow(2,t) - 1;
-					for(var j=0; j<bundlesPerChar; j+=1) {
-						decM = dec & mask;
-						modMessage.push(decM >> (j*t));
-						mask <<= t;
-					}
-				}
-				oldDec = dec;
-			}
+          mask = Math.pow(2,2*t-curOverlapping) * (1 - Math.pow(2, -t));
+          for(var j=1; j<bundlesPerChar; j+=1) {
+            decM = dec & mask;
+            modMessage.push(decM >> (((j-1)*t)+(t-curOverlapping)));
+            mask <<= t;
+          }
+          if((overlapping*(i+1))%t === 0) {
+            mask = 65536 * (1 - Math.pow(2,-t));
+            decM = dec & mask;
+            modMessage.push(decM >> (((bundlesPerChar-1)*t)+1));
+          }
+          else if(((((overlapping*(i+1))%t) + (t-curOverlapping)) <= t)) {
+            decM = dec & mask;
+            modMessage.push(decM >> (((bundlesPerChar-1)*t)+(t-curOverlapping)));
+          }
+        }
+        else {
+          mask = Math.pow(2,t) - 1;
+          for(var j=0; j<bundlesPerChar; j+=1) {
+            decM = dec & mask;
+            modMessage.push(decM >> (j*t));
+            mask <<= t;
+          }
+        }
+        oldDec = dec;
+      }
 
-			// Write Data
-			var offset, index, subOffset, delimiter = messageDelimiter(modMessage,threshold);
-			for(offset = 0; (offset+threshold)*4 < data.length && (offset+threshold) < modMessage.length; offset += threshold) {
-				var q, qS=[];
-				for(var i=0; i<threshold && i+offset < modMessage.length; i+=1) {
-					q = 0;
-					for(var j=offset; j<threshold+offset && j<modMessage.length; j+=1)
-						q+=modMessage[j]*Math.pow(args(i),j-offset);
-					qS[i] = (255-prime+1)+(q%prime);
-				}
-				for(var i=offset*4; i<(offset+qS.length)*4 && i<data.length; i+=4)
-					data[i+3] = qS[(i/4)%threshold];
-				
-				subOffset = qS.length;
-			}
-			// Write message-delimiter
-			for(index = (offset+subOffset); index-(offset+subOffset)<delimiter.length && (offset+delimiter.length)*4<data.length; index+=1)
-				data[(index*4)+3]=delimiter[index-(offset+subOffset)];
-			// Clear remaining data
-			for(var i=((index+1)*4)+3; i<data.length; i+=4) data[i] = 255;
+      // Write Data
+      var offset, index, subOffset, delimiter = messageDelimiter(modMessage,threshold);
+      for(offset = 0; (offset+threshold)*4 < data.length && (offset+threshold) < modMessage.length; offset += threshold) {
+        var q, qS=[];
+        for(var i=0; i<threshold && i+offset < modMessage.length; i+=1) {
+          q = 0;
+          for(var j=offset; j<threshold+offset && j<modMessage.length; j+=1)
+            q+=modMessage[j]*Math.pow(args(i),j-offset);
+          qS[i] = (255-prime+1)+(q%prime);
+        }
+        for(var i=offset*4; i<(offset+qS.length)*4 && i<data.length; i+=4)
+          data[i+3] = qS[(i/4)%threshold];
+        
+        subOffset = qS.length;
+      }
+      // Write message-delimiter
+      for(index = (offset+subOffset); index-(offset+subOffset)<delimiter.length && (offset+delimiter.length)*4<data.length; index+=1)
+        data[(index*4)+3]=delimiter[index-(offset+subOffset)];
+      // Clear remaining data
+      for(var i=((index+1)*4)+3; i<data.length; i+=4) data[i] = 255;
 
-			imageData.data = data;
-			shadowCtx.putImageData(imageData, 0, 0);
+      imageData.data = data;
+      shadowCtx.putImageData(imageData, 0, 0);
 
-			return shadowCanvas.toDataURL();
-		},
-		"decode": function(image, options) {
-			options = options || {};
-			var config = this.config;
-			
-			var t = options.t || config.t, threshold = options.threshold || config.threshold,
-				prime = util.findNextPrime(Math.pow(2, t)),
-				imageData, data, q, args = options.args || config.args, modMessage = [], 
-				messageCompleted = options.messageCompleted || config.messageCompleted;
+      return shadowCanvas.toDataURL();
+    },
+    "decode": function(image, options) {
+      options = options || {};
+      var config = this.config;
+      
+      var t = options.t || config.t, threshold = options.threshold || config.threshold,
+        prime = util.findNextPrime(Math.pow(2, t)),
+        imageData, data, q, args = options.args || config.args, modMessage = [], 
+        messageCompleted = options.messageCompleted || config.messageCompleted;
 
-			if(!t || (t < 1 && t > 7)) throw "Error: Parameter t = " + t + " is not valid: 0 < t < 8";
-				
-			var shadowCanvas = document.createElement('canvas'),
-				shadowCtx = shadowCanvas.getContext('2d');
+      if(!t || (t < 1 && t > 7)) throw "Error: Parameter t = " + t + " is not valid: 0 < t < 8";
+        
+      var shadowCanvas = document.createElement('canvas'),
+        shadowCtx = shadowCanvas.getContext('2d');
 
-			shadowCanvas.style.display = 'none';
-			document.body.appendChild(shadowCanvas);
+      shadowCanvas.style.display = 'none';
+      document.body.appendChild(shadowCanvas);
 
-			shadowCanvas.width = options.width || image.width;
-			shadowCanvas.height = options.width || image.height;
-			
-			if(options.height && options.width) {
-				shadowCtx.drawImage(image, 0, 0, options.width, options.height );
-			} else {
-				shadowCtx.drawImage(image, 0, 0);
-			}
+      if(image.length) {
+        var dataURL = image;
+        image = new Image();
+        image.src = dataURL;
+      }
+      shadowCanvas.width = options.width || image.width;
+      shadowCanvas.height = options.width || image.height;
+      if(options.height && options.width) {
+        shadowCtx.drawImage(image, 0, 0, options.width, options.height );
+      } else {
+        shadowCtx.drawImage(image, 0, 0);
+      }
 
-			imageData = shadowCtx.getImageData(0, 0, shadowCanvas.width, shadowCanvas.height);
-			data = imageData.data;
+      imageData = shadowCtx.getImageData(0, 0, shadowCanvas.width, shadowCanvas.height);
+      data = imageData.data;
 
-			if (threshold === 1) {
-				for(var i=3, done=false; !done && i<data.length && !done; i+=4) {
-					done = messageCompleted(data, i, threshold);
-					if(!done) modMessage.push(data[i]-(255-prime+1));
-				}
-			} else {
-				for(var k = 0, done=false; !done; k+=1) {
-					q = [];
-					for(var i=(k*threshold*4)+3; i<(k+1)*threshold*4 && i<data.length && !done; i+=4) {
-						done = messageCompleted(data,i,threshold);
-						if(!done) q.push(data[i]-(255-prime+1)); // at Array index (i-((k*threshold*4)+3))/4
-					}
-					if(q.length === 0) continue;
-					// Calculate the coefficients which are the same for any order of the variable, but different for each argument
-					// i.e. for args[0] coeff=q[0]*(args[1]-args[2])*(args[1]-args[3])*...(args[1]-args[threshold-1])*...*(args[threshold-1]-args[1])*...*(args[threshold-1]-args[threshold-2])
-					var variableCoefficients = (function(i) {
-						if(i >= q.length) return [];
-						return [q[i]*
-						util.product(function(j) {
-						if(j != i) {
-							return util.product(function(l) {
-							if(l != j) return (args(j) - args(l));
-							}, q.length);
-						}
-						}, q.length)].concat(arguments.callee(i+1));
-					}(0));
-					// Calculate the coefficients which are different for each order of the variable and for each argument
-					// i.e. for order=0 and args[0] coeff=args[1]*args[2]*...*args[threshold-1]
-					var orderVariableCoefficients = function(order, varIndex) {
-						var workingArgs = util.createArrayFromArgs(args,varIndex,q.length), maxRec = q.length - (order+1);
-						return (function(startIndex, endIndex, recDepth) {
-						var recall = arguments.callee;
-						return util.sum(function(i) {
-							if(recDepth < maxRec)
-							return workingArgs[i]*recall(i+1,startIndex+order+2,recDepth+1);
-						}, endIndex, {"start": startIndex, "defValue": 1});
-						}(0,order+1,0));
-					};
-					// Calculate the common denominator of the whole term
-					var commonDenominator = util.product(function(i) {
-						return util.product(function(j) {
-						if(j != i) return (args(i) - args(j));
-						}, q.length);
-					}, q.length);
+      if (threshold === 1) {
+        for(var i=3, done=false; !done && i<data.length && !done; i+=4) {
+          done = messageCompleted(data, i, threshold);
+          if(!done) modMessage.push(data[i]-(255-prime+1));
+        }
+      } else {
+        for(var k = 0, done=false; !done; k+=1) {
+          q = [];
+          for(var i=(k*threshold*4)+3; i<(k+1)*threshold*4 && i<data.length && !done; i+=4) {
+            done = messageCompleted(data,i,threshold);
+            if(!done) q.push(data[i]-(255-prime+1)); // at Array index (i-((k*threshold*4)+3))/4
+          }
+          if(q.length === 0) continue;
+          // Calculate the coefficients which are the same for any order of the variable, but different for each argument
+          // i.e. for args[0] coeff=q[0]*(args[1]-args[2])*(args[1]-args[3])*...(args[1]-args[threshold-1])*...*(args[threshold-1]-args[1])*...*(args[threshold-1]-args[threshold-2])
+          var variableCoefficients = (function(i) {
+            if(i >= q.length) return [];
+            return [q[i]*
+            util.product(function(j) {
+            if(j != i) {
+              return util.product(function(l) {
+              if(l != j) return (args(j) - args(l));
+              }, q.length);
+            }
+            }, q.length)].concat(arguments.callee(i+1));
+          }(0));
+          // Calculate the coefficients which are different for each order of the variable and for each argument
+          // i.e. for order=0 and args[0] coeff=args[1]*args[2]*...*args[threshold-1]
+          var orderVariableCoefficients = function(order, varIndex) {
+            var workingArgs = util.createArrayFromArgs(args,varIndex,q.length), maxRec = q.length - (order+1);
+            return (function(startIndex, endIndex, recDepth) {
+            var recall = arguments.callee;
+            return util.sum(function(i) {
+              if(recDepth < maxRec)
+              return workingArgs[i]*recall(i+1,startIndex+order+2,recDepth+1);
+            }, endIndex, {"start": startIndex, "defValue": 1});
+            }(0,order+1,0));
+          };
+          // Calculate the common denominator of the whole term
+          var commonDenominator = util.product(function(i) {
+            return util.product(function(j) {
+            if(j != i) return (args(i) - args(j));
+            }, q.length);
+          }, q.length);
 
-					for(var i = 0; i < q.length; i+=1) {
-						modMessage.push((((Math.pow(-1,q.length-(i+1))*util.sum(function(j) {
-						return orderVariableCoefficients(i,j)*
-						variableCoefficients[j];
-						}, q.length))%prime)+prime)%prime); // ?divide by commonDenominator?
-					}
-				}
-			}
+          for(var i = 0; i < q.length; i+=1) {
+            modMessage.push((((Math.pow(-1,q.length-(i+1))*util.sum(function(j) {
+            return orderVariableCoefficients(i,j)*
+            variableCoefficients[j];
+            }, q.length))%prime)+prime)%prime); // ?divide by commonDenominator?
+          }
+        }
+      }
 
 
-			var message = "", charCode = 0, bitCount = 0;
-			for(var i = 0; i < modMessage.length; i+=1) {
-				charCode += modMessage[i] << bitCount;
-				bitCount += t;
-				if(bitCount > 15) {
-					message += String.fromCharCode(charCode & 65535);
-					bitCount %= 16;
-					charCode = modMessage[i] >> (t-bitCount);
-				}
-			}
-			if(charCode !== 0) message += String.fromCharCode(charCode & 65535);
+      var message = "", charCode = 0, bitCount = 0;
+      for(var i = 0; i < modMessage.length; i+=1) {
+        charCode += modMessage[i] << bitCount;
+        bitCount += t;
+        if(bitCount > 15) {
+          message += String.fromCharCode(charCode & 65535);
+          bitCount %= 16;
+          charCode = modMessage[i] >> (t-bitCount);
+        }
+      }
+      if(charCode !== 0) message += String.fromCharCode(charCode & 65535);
 
-			return message;
-		},
-		"getHidingCapacity" : function(image, options) {
-			options = options || {};
-		
-			var width = options.width || image.width,
-				height = options.height || image.height,
-				t = options.t || this.config.t;
-			return t*width*height >> 0;
-		}
-	};
-	g.hideme = new Cover();
+      return message;
+    },
+    "getHidingCapacity" : function(image, options) {
+      options = options || {};
+    
+      var width = options.width || image.width,
+        height = options.height || image.height,
+        t = options.t || this.config.t;
+      return t*width*height >> 0;
+    }
+  };
+  g.steganography = g.steg = new Cover();
 })(window);
