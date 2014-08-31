@@ -1,5 +1,5 @@
 /* 
- * steganography.js v1.0
+ * steganography.js v1.0.1
  * 
  * Copyright (C) 2012, Peter Eigenschink (http://www.peter-eigenschink.at/)
  * Dual-licensed under the MIT (http://www.opensource.org/licenses/mit-license.php)
@@ -53,6 +53,7 @@
     "config": {
       "t": 3,
       "threshold": 1,
+      "codeUnitSize": 16,
       "args": function(i) { return i+1; },
       "messageDelimiter": function(modMessage,threshold) {
                 var delimiter = new Array(threshold*3);
@@ -98,8 +99,9 @@
       // overlapping ... Count of bits of the currently handled character which are not handled during each run
       var t = options.t || config.t,
         threshold = options.threshold || config.threshold,
-        bundlesPerChar = 16/t >> 0,
-        overlapping = 16%t,
+        codeUnitSize = options.codeUnitSize || config.codeUnitSize,
+        bundlesPerChar = codeUnitSize/t >> 0,
+        overlapping = codeUnitSize%t,
         messageDelimiter = options.messageDelimiter || config.messageDelimiter,
         args = options.args || config.args,
         prime = util.findNextPrime(Math.pow(2,t)),
@@ -112,7 +114,7 @@
         var dec = message.charCodeAt(i), curOverlapping = (overlapping*i)%t, mask;
         if(curOverlapping > 0 && oldDec) {
           mask = Math.pow(2,t-curOverlapping) - 1;
-          oldMask = 65536 * (1 - Math.pow(2, -curOverlapping)); // 2^16 * ...
+          oldMask = Math.pow(2, codeUnitSize) * (1 - Math.pow(2, -curOverlapping));
           left = (dec & mask) << curOverlapping;
           right = (oldDec & oldMask) >> (bundlesPerChar*t + 1 - curOverlapping);
           modMessage.push(left+right);
@@ -124,7 +126,7 @@
             mask <<= t;
           }
           if((overlapping*(i+1))%t === 0) {
-            mask = 65536 * (1 - Math.pow(2,-t));
+            mask = Math.pow(2, codeUnitSize) * (1 - Math.pow(2,-t));
             decM = dec & mask;
             modMessage.push(decM >> (((bundlesPerChar-1)*t)+1));
           }
@@ -175,7 +177,7 @@
       var config = this.config;
       
       var t = options.t || config.t, threshold = options.threshold || config.threshold,
-        prime = util.findNextPrime(Math.pow(2, t)),
+        codeUnitSize = options.codeUnitSize || config.codeUnitSize, prime = util.findNextPrime(Math.pow(2, t)),
         imageData, data, q, args = options.args || config.args, modMessage = [], 
         messageCompleted = options.messageCompleted || config.messageCompleted;
 
@@ -258,27 +260,29 @@
       }
 
 
-      var message = "", charCode = 0, bitCount = 0;
+      var message = "", charCode = 0, bitCount = 0, mask = Math.pow(2, codeUnitSize)-1;
       for(var i = 0; i < modMessage.length; i+=1) {
         charCode += modMessage[i] << bitCount;
         bitCount += t;
-        if(bitCount > 15) {
-          message += String.fromCharCode(charCode & 65535);
-          bitCount %= 16;
+        if(bitCount >= codeUnitSize) {
+          message += String.fromCharCode(charCode & mask);
+          bitCount %= codeUnitSize;
           charCode = modMessage[i] >> (t-bitCount);
         }
       }
-      if(charCode !== 0) message += String.fromCharCode(charCode & 65535);
+      if(charCode !== 0) message += String.fromCharCode(charCode & mask);
 
       return message;
     },
     "getHidingCapacity" : function(image, options) {
       options = options || {};
+      var config = this.config;
     
       var width = options.width || image.width,
         height = options.height || image.height,
-        t = options.t || this.config.t;
-      return t*width*height >> 0;
+        t = options.t || this.config.t,
+        codeUnitSize = options.codeUnitSize || config.codeUnitSize;
+      return t*width*height/codeUnitSize >> 0;
     }
   };
   g.steganography = g.steg = new Cover();
