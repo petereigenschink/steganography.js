@@ -107,35 +107,37 @@
         prime = util.findNextPrime(Math.pow(2,t)),
         decM, oldDec, oldMask, modMessage = [], left, right;
 
-      for(var i=0; i<message.length; i+=1) {
+      for(var i=0; i<=message.length; i+=1) {
         // dec ... UTF-16 Unicode of the i-th character of the message
         // curOverlapping ... The count of the bits of the previous character not handled in the previous run
         // mask ... The raw initial bitmask, will be changed every run and if bits are overlapping
-        var dec = message.charCodeAt(i), curOverlapping = (overlapping*i)%t, mask;
+        var dec = message.charCodeAt(i) || 0, curOverlapping = (overlapping*i)%t, mask;
         if(curOverlapping > 0 && oldDec) {
           mask = Math.pow(2,t-curOverlapping) - 1;
           oldMask = Math.pow(2, codeUnitSize) * (1 - Math.pow(2, -curOverlapping));
           left = (dec & mask) << curOverlapping;
-          right = (oldDec & oldMask) >> (bundlesPerChar*t + 1 - curOverlapping);
+          right = (oldDec & oldMask) >> (codeUnitSize - curOverlapping);
           modMessage.push(left+right);
 
-          mask = Math.pow(2,2*t-curOverlapping) * (1 - Math.pow(2, -t));
-          for(var j=1; j<bundlesPerChar; j+=1) {
-            decM = dec & mask;
-            modMessage.push(decM >> (((j-1)*t)+(t-curOverlapping)));
-            mask <<= t;
-          }
-          if((overlapping*(i+1))%t === 0) {
-            mask = Math.pow(2, codeUnitSize) * (1 - Math.pow(2,-t));
-            decM = dec & mask;
-            modMessage.push(decM >> (((bundlesPerChar-1)*t)+1));
-          }
-          else if(((((overlapping*(i+1))%t) + (t-curOverlapping)) <= t)) {
-            decM = dec & mask;
-            modMessage.push(decM >> (((bundlesPerChar-1)*t)+(t-curOverlapping)));
+          if(i<message.length) {
+            mask = Math.pow(2,2*t-curOverlapping) * (1 - Math.pow(2, -t));
+            for(var j=1; j<bundlesPerChar; j+=1) {
+              decM = dec & mask;
+              modMessage.push(decM >> (((j-1)*t)+(t-curOverlapping)));
+              mask <<= t;
+            }
+            if((overlapping*(i+1))%t === 0) {
+              mask = Math.pow(2, codeUnitSize) * (1 - Math.pow(2,-t));
+              decM = dec & mask;
+              modMessage.push(decM >> (codeUnitSize-t));
+            }
+            else if(((((overlapping*(i+1))%t) + (t-curOverlapping)) <= t)) {
+              decM = dec & mask;
+              modMessage.push(decM >> (((bundlesPerChar-1)*t)+(t-curOverlapping)));
+            }
           }
         }
-        else {
+        else if(i<message.length) {
           mask = Math.pow(2,t) - 1;
           for(var j=0; j<bundlesPerChar; j+=1) {
             decM = dec & mask;
@@ -148,7 +150,7 @@
 
       // Write Data
       var offset, index, subOffset, delimiter = messageDelimiter(modMessage,threshold);
-      for(offset = 0; (offset+threshold)*4 < data.length && (offset+threshold) < modMessage.length; offset += threshold) {
+      for(offset = 0; (offset+threshold)*4 <= data.length && (offset+threshold) <= modMessage.length; offset += threshold) {
         var q, qS=[];
         for(var i=0; i<threshold && i+offset < modMessage.length; i+=1) {
           q = 0;
@@ -259,7 +261,6 @@
         }
       }
 
-
       var message = "", charCode = 0, bitCount = 0, mask = Math.pow(2, codeUnitSize)-1;
       for(var i = 0; i < modMessage.length; i+=1) {
         charCode += modMessage[i] << bitCount;
@@ -280,7 +281,7 @@
     
       var width = options.width || image.width,
         height = options.height || image.height,
-        t = options.t || this.config.t,
+        t = options.t || config.t,
         codeUnitSize = options.codeUnitSize || config.codeUnitSize;
       return t*width*height/codeUnitSize >> 0;
     }
