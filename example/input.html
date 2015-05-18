@@ -1,0 +1,107 @@
+<!doctype html>
+<html style="touch-action: none;">
+    <head>
+        <title>Steganography.js Encode JSON Example</title>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <script src="../src/steganography.js" type="text/javascript"></script>
+        <style>
+            textarea {
+                width: 90%;
+                height: 500px;
+            }
+            .left {
+                float: left;
+                width: 48%;
+                overflow: auto;
+            }
+            .right {
+                float: left;
+                width: 48%;
+                overflow: auto;
+            }
+            .clear {
+                clear: both;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Steganogrpahy.js - Encode JSON</h1>
+        <p>This example demonstrates how you can embed and carry around JSON inside an image.</p>
+        <div class="left">
+            <h2>JSON</h2>
+            <textarea>
+{"albums": [
+  {
+    "album": "The White Stripes",
+    "year": 1999,
+    "US_peak_chart_post": "-"
+  },
+  {
+    "album": "De Stijl",
+    "year": 2000,
+    "US_peak_chart_post": "-"
+  },
+  {
+    "album": "White Blood Cells",
+    "year": 2001,
+    "US_peak_chart_post": 61
+  },
+  {
+    "album": "Elephant",
+    "year": 2003,
+    "US_peak_chart_post": 6
+  },
+  {
+    "album": "Get Behind Me Satan",
+    "year": 2005,
+    "US_peak_chart_post": 3
+  },
+  {
+    "album": "Icky Thump",
+    "year": 2007,
+    "US_peak_chart_post": 2
+  },
+  {
+    "album": "Under Great White Northern Lights",
+    "year": 2010,
+    "US_peak_chart_post": 11
+  },
+  {
+    "album": "Live in Mississippi",
+    "year": 2011,
+    "US_peak_chart_post": "-"
+  },
+  {
+    "album": "Live at the Gold Dollar",
+    "year": 2012,
+    "US_peak_chart_post": "-"
+  },
+  {
+    "album": "Nine Miles from the White City",
+    "year": 2013,
+    "US_peak_chart_post": "-"
+  }
+]}
+</textarea>
+        </div>
+        <div class="right">
+            <h2>Encoded using this image</h2>
+    	    <img src="input.png" />
+            <h2>Encoded image</h2>
+            <canvas width="300" height="200"></canvas>
+            <p>Right-click to save the image as output.png. Then follow this link:</p>
+            <p><a href="output.html">See encoded image</a></p>
+        </div>
+        <div class="clear"></div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function(event) {
+                var image = document.querySelector("img"),
+                    json = document.querySelector("textarea").value,
+                    message = JSON.stringify(json),
+                    canvas = document.querySelector("canvas");
+                steg.encode(message, image, {canvas: canvas, t:3});
+            });
+        </script>
+    </body>
+</html>
