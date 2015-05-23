@@ -74,10 +74,10 @@
       options = options || {};
       var config = this.config;
 
-      var shadowCanvas = document.createElement('canvas'),
+      var shadowCanvas = options.canvas || document.createElement('canvas'),
         shadowCtx = shadowCanvas.getContext('2d');
 
-      shadowCanvas.style.display = 'none';
+      if (!options.canvas) shadowCanvas.style.display = 'none';
 
       if(image.length) {
         var dataURL = image;
@@ -185,11 +185,13 @@
 
       if(!t || (t < 1 && t > 7)) throw "Error: Parameter t = " + t + " is not valid: 0 < t < 8";
         
-      var shadowCanvas = document.createElement('canvas'),
+      var shadowCanvas = options.canvas || document.createElement('canvas'),
         shadowCtx = shadowCanvas.getContext('2d');
 
-      shadowCanvas.style.display = 'none';
-      document.body.appendChild(shadowCanvas);
+      if (!options.canvas) {
+        shadowCanvas.style.display = 'none';
+        document.body.appendChild(shadowCanvas);
+      }
 
       if(image.length) {
         var dataURL = image;

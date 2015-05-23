@@ -1,0 +1,53 @@
+<!doctype html>
+<html style="touch-action: none;">
+    <head>
+        <title>Steganography.js Decode JSON Example</title>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <script src="../src/steganography.js" type="text/javascript"></script>
+        <style>
+            textarea {
+                width: 90%;
+                height: 500px;
+            }
+            .left {
+                float: left;
+                width: 48%;
+                overflow: auto;
+            }
+            .right {
+                float: left;
+                width: 48%;
+                overflow: auto;
+            }
+            .clear {
+                clear: both;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Steganogrpahy.js - Decode JSON</h1>
+        <p>This image contains encoded JSON. The JSON is on the right. <a href="input.html">Click here to go back to the encode page.</a></p>
+        <div class="left">
+            <h2>Encoded image</h2>
+            <img src="output.png" />
+            <h2>The canvas used to decode the image</h2>
+            <canvas width="300" height="200"></canvas>
+        </div>
+        <div class="right">
+            <h2>JSON</h2>
+            <textarea></textarea>
+        </div>
+        <div class="clear"></div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function(event) {
+                var image = document.querySelector("img"),
+                    textarea = document.querySelector("textarea"),
+                    canvas = document.querySelector("canvas"),
+                    message = steg.decode(image, {canvas: canvas}),
+                    json = JSON.parse(message);
+                textarea.value = json;
+            });
+        </script>
+    </body>
+</html>
