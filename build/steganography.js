@@ -5,7 +5,18 @@
  * Copyright (C) 2012 Peter Eigenschink (http://www.peter-eigenschink.at/)
  * Dual-licensed under MIT and Beerware license.
 */
-(function(g) {
+;(function (name, context, factory) {
+
+  // Supports UMD. AMD, CommonJS/Node.js and browser context
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = factory();
+  } else if (typeof define === "function" && define.amd) {
+    define(factory);
+  } else {
+    context[name] = factory();
+  }
+
+})("stego", this, function () {
 var Cover = function Cover() {};
 var util = {
   "isPrime" : function(n) {
@@ -285,5 +296,6 @@ Cover.prototype.decode = function(image, options) {
   if(charCode !== 0) message += String.fromCharCode(charCode & mask);
 
   return message;
-};g.steganography = g.steg = new Cover();
-})(window);
+};
+return new Cover();
+});

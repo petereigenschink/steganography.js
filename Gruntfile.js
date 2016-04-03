@@ -12,7 +12,7 @@ module.exports = function (grunt) {
   // configurable paths
   var config = {
       app: 'src',
-      tmp: 'src/tmp',
+      tmp: 'test/lib',
       test: 'test',
       dist: 'build'
   };
@@ -41,7 +41,8 @@ module.exports = function (grunt) {
   var pkg = grunt.file.readJSON('package.json');
   grunt.initConfig({
     pkg: pkg,
-    config: config,
+    config: config,    
+    banner: '/*\n * <%= pkg.name %> v<%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>\n *\n * Copyright (C) 2012 Peter Eigenschink (http://www.peter-eigenschink.at/)\n * Dual-licensed under MIT and Beerware license.\n*/\n',
 
     echo: {
       help: 'README.md'
@@ -66,8 +67,8 @@ module.exports = function (grunt) {
 
     concat: {
       options: {
-        banner: '/*\n * <%= pkg.name %> v<%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>\n *\n * Copyright (C) 2012 Peter Eigenschink (http://www.peter-eigenschink.at/)\n * Dual-licensed under MIT and Beerware license.\n*/\n(function(g) {\nvar Cover = function Cover() {};\n',
-        footer: 'g.steganography = g.steg = new Cover();\n})(window);'
+        banner: '<%= banner %>;(function (name, context, factory) {\n\n  // Supports UMD. AMD, CommonJS/Node.js and browser context\n  if (typeof module !== "undefined" && module.exports) {\n    module.exports = factory();\n  } else if (typeof define === "function" && define.amd) {\n    define(factory);\n  } else {\n    context[name] = factory();\n  }\n\n})("stego", this, function () {\nvar Cover = function Cover() {};\n',
+        footer: '\nreturn new Cover();\n});'
       },
       dist: {
         src: ['<%= config.app %>/util.js','<%= config.app %>/config.js','<%= config.app %>/capacity.js','<%= config.app %>/encode.js','<%= config.app %>/decode.js'],
@@ -90,7 +91,7 @@ module.exports = function (grunt) {
 
     uglify: {
       options: {
-        banner: '/*\n * <%= pkg.name %> v<%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>\n *\n * Copyright (C) 2012 Peter Eigenschink (http://www.peter-eigenschink.at/)\n * Dual-licensed under MIT and Beerware license.\n*/\n'
+        banner: '<%= banner %>'
       },
       build: {
         src: '<%= config.dist %>/steganography.js',
@@ -150,7 +151,7 @@ module.exports = function (grunt) {
       'clean',
       'concat' + target,
       'jshint',
-      //'test',
+      'test',
       'copy:dist',
       'uglify',
       'jsdoc',

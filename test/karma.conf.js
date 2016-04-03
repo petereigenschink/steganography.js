@@ -7,19 +7,20 @@ module.exports = function (config) {
   config.set({
 
     // base path, that will be used to resolve files and exclude, relative to THIS config file!
-    basePath: '../..',
+    basePath: '.',
 
     // frameworks to use
     frameworks: ['jasmine'],
 
     // list of files / patterns to load in the browser
     files: [
-      'node_modules/js-mock/dist/js-mock.js',
-      'node_modules/jquery/dist/jquery.js',
-      {pattern: 'test/lib/*.js'},
-      {pattern: 'src/tmp/*.js'},
-      {pattern: 'test/js/*.spec.js'},
-      {pattern: 'test/img/*'}
+      '../node_modules/js-mock/dist/js-mock.js',
+      '../node_modules/jquery/dist/jquery.js',
+      '../node_modules/karma-read-json/karma-read-json.js',
+      {pattern: 'lib/*.js'},
+      {pattern: 'js/*.spec.js'},
+      {pattern: 'img/*', included: false},
+      {pattern: 'json/*', included: false}
     ],
 
     // list of files to exclude
@@ -27,7 +28,7 @@ module.exports = function (config) {
 
     // For code coverage reporting
     preprocessors: {
-      'src/tmp/**/*.js': 'coverage'
+      'lib/**/*.js': 'coverage'
     },
 
     // test results reporter to use

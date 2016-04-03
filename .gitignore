@@ -1,4 +1,4 @@
 dist
 docs
 node_modules
-src/tmp
+test/lib/steganography.js

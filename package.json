@@ -35,6 +35,7 @@
     "karma-html2js-preprocessor": "0.1.0",
     "karma-jasmine": "~0.3.6",
     "karma-phantomjs-launcher": "1.0.0",
+    "karma-read-json": "1.1.0",
     "karma-requirejs": "0.2.6",
     "karma-script-launcher": "0.2.0",
     "karma-teamcity-reporter": "0.2",
