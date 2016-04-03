@@ -1,0 +1,30 @@
+{
+  "node": true,
+  "browser": true,
+  "esnext": true,
+  "bitwise": false,
+  "curly": false,
+  "eqeqeq": true,
+  "eqnull": true,
+  "immed": true,
+  "latedef": true,
+  "newcap": true,
+  "noarg": true,
+  "undef": true,
+  "strict": false,
+  "trailing": false,
+  "smarttabs": true,
+  "globals": {
+    "AsyncSpec": false,
+    "JsMock": false,
+    "define": false,
+    "describe": false,
+    "it": false,
+    "before": false,
+    "beforeEach": false,
+    "after": false,
+    "afterEach": false,
+    "window": true,
+    "steganography": true
+  }
+}
