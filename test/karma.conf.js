@@ -17,8 +17,8 @@ module.exports = function (config) {
       '../node_modules/js-mock/dist/js-mock.js',
       '../node_modules/jquery/dist/jquery.js',
       '../node_modules/karma-read-json/karma-read-json.js',
-      {pattern: 'lib/*.js'},
-      {pattern: 'js/*.spec.js'},
+      {pattern: 'js/*.js'},
+      {pattern: 'spec/*.spec.js'},
       {pattern: 'img/*', included: false},
       {pattern: 'json/*', included: false}
     ],

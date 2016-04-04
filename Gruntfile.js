@@ -12,7 +12,7 @@ module.exports = function (grunt) {
   // configurable paths
   var config = {
       app: 'src',
-      tmp: 'test/lib',
+      testJs: '<%= config.test %>/js',
       test: 'test',
       dist: 'build'
   };
@@ -52,8 +52,7 @@ module.exports = function (grunt) {
       options: {
         force: true
       },
-      links: ["<%= config.dist %>/**", "coverage/**"],
-      tmp: ["<%= config.tmp %>/**"]
+      links: ["<%= config.dist %>/**", "coverage/**"]
     },
 
     jsdoc : {
@@ -72,14 +71,14 @@ module.exports = function (grunt) {
       },
       dist: {
         src: ['<%= config.app %>/util.js','<%= config.app %>/config.js','<%= config.app %>/capacity.js','<%= config.app %>/encode.js','<%= config.app %>/decode.js'],
-        dest: '<%= config.tmp %>/steganography.js',
+        dest: '<%= config.testJs %>/steganography.js',
         nonull: true
       }
     },
 
     copy: {
       dist: {
-        src: '<%= config.tmp %>/steganography.js',
+        src: '<%= config.testJs %>/steganography.js',
         dest: '<%= config.dist %>/steganography.js',
         options: {
           process: function (content) {
@@ -106,7 +105,7 @@ module.exports = function (grunt) {
         },
         all: [
             'Gruntfile.js',
-            '<%= config.tmp %>/{,*/}*.js'
+            '<%= config.testJs %>/{,*/}*.js'
         ]
     },
 
@@ -154,8 +153,7 @@ module.exports = function (grunt) {
       'test',
       'copy:dist',
       'uglify',
-      'jsdoc',
-      'clean:tmp'
+      'jsdoc'
     ]);
   });
 
