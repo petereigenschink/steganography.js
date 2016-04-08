@@ -66,7 +66,7 @@ module.exports = function (grunt) {
 
     concat: {
       options: {
-        banner: '<%= banner %>;(function (name, context, factory) {\n\n  // Supports UMD. AMD, CommonJS/Node.js and browser context\n  if (typeof module !== "undefined" && module.exports) {\n    module.exports = factory();\n  } else if (typeof define === "function" && define.amd) {\n    define(factory);\n  } else {\n    context[name] = factory();\n  }\n\n})("stego", this, function () {\nvar Cover = function Cover() {};\n',
+        banner: '<%= banner %>;(function (name, context, factory) {\n\n  // Supports UMD. AMD, CommonJS/Node.js and browser context\n  if (typeof module !== "undefined" && module.exports) {\n    module.exports = factory();\n  } else if (typeof define === "function" && define.amd) {\n    define(factory);\n  } else {\n    context[name] = factory();\n  }\n\n})("steg", this, function () {\nvar Cover = function Cover() {};\n',
         footer: '\nreturn new Cover();\n});'
       },
       dist: {
@@ -79,12 +79,7 @@ module.exports = function (grunt) {
     copy: {
       dist: {
         src: '<%= config.testJs %>/steganography.js',
-        dest: '<%= config.dist %>/steganography.js',
-        options: {
-          process: function (content) {
-            return '/* ' + pkg.name + ' v' + pkg.version + ' ' + grunt.template.today("yyyy-mm-dd") + ' - Copyright notice here */\n' + content;
-          },
-        },
+        dest: '<%= config.dist %>/steganography.js'
       }
     },
 

@@ -1,6 +1,5 @@
-/* steganography.js v1.0.1 2016-04-04 - Copyright notice here */
 /*
- * steganography.js v1.0.1 2016-04-04
+ * steganography.js v1.0.2 2016-04-08
  *
  * Copyright (C) 2012 Peter Eigenschink (http://www.peter-eigenschink.at/)
  * Dual-licensed under MIT and Beerware license.
@@ -16,7 +15,7 @@
     context[name] = factory();
   }
 
-})("stego", this, function () {
+})("steg", this, function () {
 var Cover = function Cover() {};
 var util = {
   "isPrime" : function(n) {
@@ -89,19 +88,28 @@ Cover.prototype.getHidingCapacity = function(image, options) {
   return t*width*height/codeUnitSize >> 0;
 };
 Cover.prototype.encode = function(message, image, options) {
-  options = options || {};
-  var config = this.config;
-
-  var shadowCanvas = document.createElement('canvas'),
-    shadowCtx = shadowCanvas.getContext('2d');
-
-  shadowCanvas.style.display = 'none';
-
   if(image.length) {
     var dataURL = image;
     image = new Image();
     image.src = dataURL;
   }
+
+  options = options || {};
+  var config = this.config;
+
+  var t = options.t || config.t,
+    threshold = options.threshold || config.threshold,
+    codeUnitSize = options.codeUnitSize || config.codeUnitSize,
+    prime = util.findNextPrime(Math.pow(2,t)),
+    args = options.args || config.args,
+    messageDelimiter = options.messageDelimiter || config.messageDelimiter;
+
+  if(!t || (t < 1 && t > 7)) throw "Error: Parameter t = " + t + " is not valid: 0 < t < 8";
+
+  var shadowCanvas = document.createElement('canvas'),
+    shadowCtx = shadowCanvas.getContext('2d');
+
+  shadowCanvas.style.display = 'none';
   shadowCanvas.width = options.width || image.width;
   shadowCanvas.height = options.height || image.height;
   if(options.height && options.width) {
@@ -109,26 +117,22 @@ Cover.prototype.encode = function(message, image, options) {
   } else {
     shadowCtx.drawImage(image, 0, 0);
   }
-  
 
   var imageData = shadowCtx.getImageData(0, 0, shadowCanvas.width, shadowCanvas.height),
     data = imageData.data;
+
   // bundlesPerChar ... Count of full t-bit-sized bundles per Character
   // overlapping ... Count of bits of the currently handled character which are not handled during each run
   // dec ... UTF-16 Unicode of the i-th character of the message
   // curOverlapping ... The count of the bits of the previous character not handled in the previous run
   // mask ... The raw initial bitmask, will be changed every run and if bits are overlapping
-  var t = options.t || config.t,
-    threshold = options.threshold || config.threshold,
-    codeUnitSize = options.codeUnitSize || config.codeUnitSize,
-    bundlesPerChar = codeUnitSize/t >> 0,
+  var bundlesPerChar = codeUnitSize/t >> 0,
     overlapping = codeUnitSize%t,
-    messageDelimiter = options.messageDelimiter || config.messageDelimiter,
-    args = options.args || config.args,
-    prime = util.findNextPrime(Math.pow(2,t)),
-    decM, oldDec, oldMask, modMessage = [], left, right, i, j,
+    modMessage = [],
+    decM, oldDec, oldMask, left, right,
     dec, curOverlapping, mask;
 
+  var i, j;
   for(i=0; i<=message.length; i+=1) {
     dec = message.charCodeAt(i) || 0;
     curOverlapping = (overlapping*i)%t;
@@ -196,12 +200,20 @@ Cover.prototype.encode = function(message, image, options) {
   return shadowCanvas.toDataURL();
 };
 Cover.prototype.decode = function(image, options) {
+  if(image.length) {
+    var dataURL = image;
+    image = new Image();
+    image.src = dataURL;
+  }
+
   options = options || {};
   var config = this.config;
   
-  var t = options.t || config.t, threshold = options.threshold || config.threshold,
-    codeUnitSize = options.codeUnitSize || config.codeUnitSize, prime = util.findNextPrime(Math.pow(2, t)),
-    imageData, data, q, args = options.args || config.args, modMessage = [], 
+  var t = options.t || config.t,
+    threshold = options.threshold || config.threshold,
+    codeUnitSize = options.codeUnitSize || config.codeUnitSize,
+    prime = util.findNextPrime(Math.pow(2, t)),
+    args = options.args || config.args, 
     messageCompleted = options.messageCompleted || config.messageCompleted;
 
   if(!t || (t < 1 && t > 7)) throw "Error: Parameter t = " + t + " is not valid: 0 < t < 8";
@@ -210,13 +222,6 @@ Cover.prototype.decode = function(image, options) {
     shadowCtx = shadowCanvas.getContext('2d');
 
   shadowCanvas.style.display = 'none';
-  document.body.appendChild(shadowCanvas);
-
-  if(image.length) {
-    var dataURL = image;
-    image = new Image();
-    image.src = dataURL;
-  }
   shadowCanvas.width = options.width || image.width;
   shadowCanvas.height = options.width || image.height;
   if(options.height && options.width) {
@@ -225,8 +230,10 @@ Cover.prototype.decode = function(image, options) {
     shadowCtx.drawImage(image, 0, 0);
   }
 
-  imageData = shadowCtx.getImageData(0, 0, shadowCanvas.width, shadowCanvas.height);
-  data = imageData.data;
+  var imageData = shadowCtx.getImageData(0, 0, shadowCanvas.width, shadowCanvas.height),
+    data = imageData.data,
+    modMessage = [],
+    q;
 
   var i, k, done;
   if (threshold === 1) {
