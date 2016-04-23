@@ -1,5 +1,5 @@
 /*
- * steganography.js v1.0.2 2016-04-08
+ * steganography.js v1.0.2 2016-04-23
  *
  * Copyright (C) 2012 Peter Eigenschink (http://www.peter-eigenschink.at/)
  * Dual-licensed under MIT and Beerware license.
@@ -55,6 +55,12 @@ var util = {
       ret[i] = args(i >= index ? i+1:i);
 
     return ret;
+  },
+  "loadImg": function(url) {
+    var image = new Image();
+    image.src = url;
+    while(image.hasOwnProperty('complete') && !image.complete) {}
+    return image;
   }
 };
 Cover.prototype.config = {
@@ -89,9 +95,7 @@ Cover.prototype.getHidingCapacity = function(image, options) {
 };
 Cover.prototype.encode = function(message, image, options) {
   if(image.length) {
-    var dataURL = image;
-    image = new Image();
-    image.src = dataURL;
+    image = util.loadImg(image);
   }
 
   options = options || {};
@@ -104,7 +108,7 @@ Cover.prototype.encode = function(message, image, options) {
     args = options.args || config.args,
     messageDelimiter = options.messageDelimiter || config.messageDelimiter;
 
-  if(!t || (t < 1 && t > 7)) throw "Error: Parameter t = " + t + " is not valid: 0 < t < 8";
+  if(!t || t < 1 || t > 7) throw "Error: Parameter t = " + t + " is not valid: 0 < t < 8";
 
   var shadowCanvas = document.createElement('canvas'),
     shadowCtx = shadowCanvas.getContext('2d');
@@ -201,9 +205,7 @@ Cover.prototype.encode = function(message, image, options) {
 };
 Cover.prototype.decode = function(image, options) {
   if(image.length) {
-    var dataURL = image;
-    image = new Image();
-    image.src = dataURL;
+    image = util.loadImg(image);
   }
 
   options = options || {};
@@ -216,7 +218,7 @@ Cover.prototype.decode = function(image, options) {
     args = options.args || config.args, 
     messageCompleted = options.messageCompleted || config.messageCompleted;
 
-  if(!t || (t < 1 && t > 7)) throw "Error: Parameter t = " + t + " is not valid: 0 < t < 8";
+  if(!t || t < 1 || t > 7) throw "Error: Parameter t = " + t + " is not valid: 0 < t < 8";
     
   var shadowCanvas = document.createElement('canvas'),
     shadowCtx = shadowCanvas.getContext('2d');
