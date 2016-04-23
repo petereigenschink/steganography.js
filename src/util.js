@@ -36,5 +36,11 @@ var util = {
       ret[i] = args(i >= index ? i+1:i);
 
     return ret;
+  },
+  "loadImg": function(url) {
+    var image = new Image();
+    image.src = url;
+    while(image.hasOwnProperty('complete') && !image.complete) {}
+    return image;
   }
 };

@@ -1,8 +1,6 @@
 Cover.prototype.encode = function(message, image, options) {
   if(image.length) {
-    var dataURL = image;
-    image = new Image();
-    image.src = dataURL;
+    image = util.loadImg(image);
   }
 
   options = options || {};
@@ -15,7 +13,7 @@ Cover.prototype.encode = function(message, image, options) {
     args = options.args || config.args,
     messageDelimiter = options.messageDelimiter || config.messageDelimiter;
 
-  if(!t || (t < 1 && t > 7)) throw "Error: Parameter t = " + t + " is not valid: 0 < t < 8";
+  if(!t || t < 1 || t > 7) throw "Error: Parameter t = " + t + " is not valid: 0 < t < 8";
 
   var shadowCanvas = document.createElement('canvas'),
     shadowCtx = shadowCanvas.getContext('2d');
