@@ -110,11 +110,11 @@ module.exports = function (grunt) {
       },
       unit: {
         singleRun: true,
-        browsers: ['PhantomJS'],
+        browsers: ['Chrome'],
         reporters: ['dots', 'coverage']
       },
       watch: {
-        browsers: ['PhantomJS'],
+        browsers: ['Chrome'],
         reporters: ['dots', 'coverage']
       },
       debug: {

@@ -28,7 +28,7 @@ module.exports = function (config) {
 
     // For code coverage reporting
     preprocessors: {
-      'lib/**/*.js': 'coverage'
+      'js/**/*.js': 'coverage'
     },
 
     // test results reporter to use
@@ -88,7 +88,6 @@ module.exports = function (config) {
     plugins: [
       'karma-jasmine',
       'karma-coverage',
-      'karma-phantomjs-launcher',
       'karma-chrome-launcher'
     ]
   });
