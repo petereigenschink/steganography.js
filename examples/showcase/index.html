@@ -54,7 +54,7 @@
 			#messageArea {
 				width:100%;
 			}
-			#img {
+			#img, #cover {
 				width:290px;
 			}
 			.btns {
@@ -171,7 +171,7 @@
 		</div>
 		<script type="text/javascript" src="/build/steganography.js"></script>
 		<script type="text/javascript">
-		
+
 		function handleFileSelect(evt) {
 			var original = document.getElementById("original"),
 				stego = document.getElementById("stego"),
@@ -179,7 +179,7 @@
 				cover = document.getElementById("cover"),
 				message = document.getElementById("message");
 			if(!original || !stego) return;
-			
+
 			var files = evt.target.files; // FileList object
 
 			// Loop through the FileList and render image files as thumbnails.
@@ -209,7 +209,7 @@
 				reader.readAsDataURL(f);
 			}
 		}
-		
+
 		function hide() {
 			var stego = document.getElementById("stego"),
 				img = document.getElementById("img"),
@@ -218,14 +218,14 @@
 				textarea = document.getElementById("text"),
 				download = document.getElementById("download");
 			if(img && textarea) {
-				cover.src = steg.encode(textarea.value, img, {"width": img.width, "height": img.height});
+				cover.src = steg.encode(textarea.value, img);
 				stego.className = "half";
 				message.innerHTML="";
 				message.parentNode.className="invisible";
 				download.href=cover.src.replace("image/png", "image/octet-stream");
 			}
 		}
-		
+
 		function read() {
 			var img = document.getElementById("img"),
 				cover = document.getElementById("cover"),
@@ -240,14 +240,14 @@
 				}
 			}
 		}
-		
+
 		function updateCapacity() {
 			var img = document.getElementById('img'),
 				textarea = document.getElementById('text');
 			if(img && text)
 				document.getElementById('capacity').innerHTML='('+textarea.value.length + '/' + steg.getHidingCapacity(img) +' chars)';
 		}
-	
+
 		window.onload = function(){
 			document.getElementById('file').addEventListener('change', handleFileSelect, false);
 			document.getElementById('hide').addEventListener('click', hide, false);
