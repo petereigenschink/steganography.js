@@ -1,6 +1,11 @@
 Cover.prototype.encode = function(message, image, options) {
+  // Handle image url
   if(image.length) {
     image = util.loadImg(image);
+  } else if(image.src) {
+    image = util.loadImg(image.src);
+  } else if(!(image instanceof HTMLImageElement)) {
+    throw new Error('IllegalInput: The input image is neither an URL string nor an image.');
   }
 
   options = options || {};
@@ -13,7 +18,7 @@ Cover.prototype.encode = function(message, image, options) {
     args = options.args || config.args,
     messageDelimiter = options.messageDelimiter || config.messageDelimiter;
 
-  if(!t || t < 1 || t > 7) throw "Error: Parameter t = " + t + " is not valid: 0 < t < 8";
+  if(!t || t < 1 || t > 7) throw new Error('IllegalOptions: Parameter t = " + t + " is not valid: 0 < t < 8');
 
   var shadowCanvas = document.createElement('canvas'),
     shadowCtx = shadowCanvas.getContext('2d');
@@ -46,7 +51,10 @@ Cover.prototype.encode = function(message, image, options) {
     dec = message.charCodeAt(i) || 0;
     curOverlapping = (overlapping*i)%t;
     if(curOverlapping > 0 && oldDec) {
+      // Mask for the new character, shifted with the count of overlapping bits
       mask = Math.pow(2,t-curOverlapping) - 1;
+      // Mask for the old character, i.e. the t-curOverlapping bits on the right
+      // of that character
       oldMask = Math.pow(2, codeUnitSize) * (1 - Math.pow(2, -curOverlapping));
       left = (dec & mask) << curOverlapping;
       right = (oldDec & oldMask) >> (codeUnitSize - curOverlapping);
@@ -94,7 +102,7 @@ Cover.prototype.encode = function(message, image, options) {
     }
     for(i=offset*4; i<(offset+qS.length)*4 && i<data.length; i+=4)
       data[i+3] = qS[(i/4)%threshold];
-    
+
     subOffset = qS.length;
   }
   // Write message-delimiter

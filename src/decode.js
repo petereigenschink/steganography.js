@@ -1,20 +1,25 @@
 Cover.prototype.decode = function(image, options) {
+  // Handle image url
   if(image.length) {
     image = util.loadImg(image);
+  } else if(image.src) {
+    image = util.loadImg(image.src);
+  } else if(!(image instanceof HTMLImageElement)) {
+    throw new Error('IllegalInput: The input image is neither an URL string nor an image.');
   }
 
   options = options || {};
   var config = this.config;
-  
+
   var t = options.t || config.t,
     threshold = options.threshold || config.threshold,
     codeUnitSize = options.codeUnitSize || config.codeUnitSize,
     prime = util.findNextPrime(Math.pow(2, t)),
-    args = options.args || config.args, 
+    args = options.args || config.args,
     messageCompleted = options.messageCompleted || config.messageCompleted;
 
-  if(!t || t < 1 || t > 7) throw "Error: Parameter t = " + t + " is not valid: 0 < t < 8";
-    
+  if(!t || t < 1 || t > 7) throw new Error('IllegalOptions: Parameter t = " + t + " is not valid: 0 < t < 8');
+
   var shadowCanvas = document.createElement('canvas'),
     shadowCtx = shadowCanvas.getContext('2d');
 

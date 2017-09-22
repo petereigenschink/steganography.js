@@ -1,5 +1,5 @@
 /*
- * steganography.js v1.0.2 2016-04-23
+ * steganography.js v1.0.3 2017-09-22
  *
  * Copyright (C) 2012 Peter Eigenschink (http://www.peter-eigenschink.at/)
  * Dual-licensed under MIT and Beerware license.
@@ -59,10 +59,10 @@ var util = {
   "loadImg": function(url) {
     var image = new Image();
     image.src = url;
-    while(image.hasOwnProperty('complete') && !image.complete) {}
     return image;
   }
 };
+
 Cover.prototype.config = {
   "t": 3,
   "threshold": 1,
@@ -94,8 +94,13 @@ Cover.prototype.getHidingCapacity = function(image, options) {
   return t*width*height/codeUnitSize >> 0;
 };
 Cover.prototype.encode = function(message, image, options) {
+  // Handle image url
   if(image.length) {
     image = util.loadImg(image);
+  } else if(image.src) {
+    image = util.loadImg(image.src);
+  } else if(!(image instanceof HTMLImageElement)) {
+    throw new Error('IllegalInput: The input image is neither an URL string nor an image.');
   }
 
   options = options || {};
@@ -108,7 +113,7 @@ Cover.prototype.encode = function(message, image, options) {
     args = options.args || config.args,
     messageDelimiter = options.messageDelimiter || config.messageDelimiter;
 
-  if(!t || t < 1 || t > 7) throw "Error: Parameter t = " + t + " is not valid: 0 < t < 8";
+  if(!t || t < 1 || t > 7) throw new Error('IllegalOptions: Parameter t = " + t + " is not valid: 0 < t < 8');
 
   var shadowCanvas = document.createElement('canvas'),
     shadowCtx = shadowCanvas.getContext('2d');
@@ -141,7 +146,10 @@ Cover.prototype.encode = function(message, image, options) {
     dec = message.charCodeAt(i) || 0;
     curOverlapping = (overlapping*i)%t;
     if(curOverlapping > 0 && oldDec) {
+      // Mask for the new character, shifted with the count of overlapping bits
       mask = Math.pow(2,t-curOverlapping) - 1;
+      // Mask for the old character, i.e. the t-curOverlapping bits on the right
+      // of that character
       oldMask = Math.pow(2, codeUnitSize) * (1 - Math.pow(2, -curOverlapping));
       left = (dec & mask) << curOverlapping;
       right = (oldDec & oldMask) >> (codeUnitSize - curOverlapping);
@@ -189,7 +197,7 @@ Cover.prototype.encode = function(message, image, options) {
     }
     for(i=offset*4; i<(offset+qS.length)*4 && i<data.length; i+=4)
       data[i+3] = qS[(i/4)%threshold];
-    
+
     subOffset = qS.length;
   }
   // Write message-delimiter
@@ -203,23 +211,29 @@ Cover.prototype.encode = function(message, image, options) {
 
   return shadowCanvas.toDataURL();
 };
+
 Cover.prototype.decode = function(image, options) {
+  // Handle image url
   if(image.length) {
     image = util.loadImg(image);
+  } else if(image.src) {
+    image = util.loadImg(image.src);
+  } else if(!(image instanceof HTMLImageElement)) {
+    throw new Error('IllegalInput: The input image is neither an URL string nor an image.');
   }
 
   options = options || {};
   var config = this.config;
-  
+
   var t = options.t || config.t,
     threshold = options.threshold || config.threshold,
     codeUnitSize = options.codeUnitSize || config.codeUnitSize,
     prime = util.findNextPrime(Math.pow(2, t)),
-    args = options.args || config.args, 
+    args = options.args || config.args,
     messageCompleted = options.messageCompleted || config.messageCompleted;
 
-  if(!t || t < 1 || t > 7) throw "Error: Parameter t = " + t + " is not valid: 0 < t < 8";
-    
+  if(!t || t < 1 || t > 7) throw new Error('IllegalOptions: Parameter t = " + t + " is not valid: 0 < t < 8');
+
   var shadowCanvas = document.createElement('canvas'),
     shadowCtx = shadowCanvas.getContext('2d');
 
@@ -306,5 +320,6 @@ Cover.prototype.decode = function(image, options) {
 
   return message;
 };
+
 return new Cover();
 });

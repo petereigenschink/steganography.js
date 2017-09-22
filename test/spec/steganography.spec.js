@@ -9,7 +9,7 @@ describe('steganography.js', function(){
   }
 
 
-  describe('Encode/Decode consistency', function(){
+  describe('Encode/Decode utf8 consistency', function(){
     function encodeDecode(cb, config) {
       var img = new Image();
       img.onload = function() {
@@ -25,7 +25,7 @@ describe('steganography.js', function(){
       img.src = resources.img.cover;
     }
 
-    it('is given using default config', function (done) {
+    it('is given for the message using default config', function (done) {
       encodeDecode(function(msg, readMsg) {
         expect(readMsg).toEqual(msg);
         done();
@@ -36,6 +36,51 @@ describe('steganography.js', function(){
   describe('Encode', function(){
     it('is defined', function () {
       expect(steg.encode).not.toBeUndefined();
+    });
+
+    it('conserves image quality', function (done) {
+      var img = new Image();
+      img.onload = function() {
+        var [originalWidth, originalHeight] = [img.width, img.height];
+        var msg = readJSON(resources.json.utf8);
+        var dataURLWithImgCover = steg.encode(msg, img);
+
+        var stegImg = new Image();
+        stegImg.onload = function() {
+          var [stegWidth, stegHeight] = [stegImg.width, stegImg.height];
+
+          expect(originalWidth).toEqual(stegWidth);
+          expect(originalHeight).toEqual(stegHeight);
+
+          done();
+        }
+        stegImg.src = dataURLWithImgCover;
+      };
+      img.src = resources.img.cover;
+    });
+
+    it('conserves image quality with resized DOM element', function (done) {
+      var img = new Image();
+      img.style.width = '290px';
+      img.style.height = 'auto';
+      img.onload = function() {
+        var [originalWidth, originalHeight] = [img.width, img.height];
+        document.body.appendChild(img);
+        var msg = readJSON(resources.json.utf8);
+        var dataURLWithImgCover = steg.encode(msg, img);
+
+        var stegImg = new Image();
+        stegImg.onload = function() {
+          var [stegWidth, stegHeight] = [stegImg.width, stegImg.height];
+
+          expect(originalWidth).toEqual(stegWidth);
+          expect(originalHeight).toEqual(stegHeight);
+
+          done();
+        }
+        stegImg.src = dataURLWithImgCover;
+      };
+      img.src = resources.img.cover;
     });
 
     it('works with URL', function(done) {
@@ -50,7 +95,7 @@ describe('steganography.js', function(){
       img.src = resources.img.cover;
     });
 
-    it('works with base 64 data URL', function(done) {
+    xit('works with base 64 data URL', function(done) {
       var img = new Image();
       img.onload = function() {
         var canvas = document.createElement('canvas');
@@ -66,17 +111,35 @@ describe('steganography.js', function(){
       };
       img.src = resources.img.cover;
     });
+
+    it('throws an error for non-string, non-image objects', function() {
+      expect(function() { steg.encode('Test', {}) }).toThrowError('IllegalInput: The input image is neither an URL string nor an image.');
+    })
   });
 
   describe('Decode', function(){
     it('is defined', function () {
       expect(steg.decode).not.toBeUndefined();
     });
+
+    it('throws an error for non-string, non-image objects', function() {
+      expect(function() { steg.encode('Test', {}) }).toThrowError('IllegalInput: The input image is neither an URL string nor an image.');
+    })
   });
 
   describe('Capacity', function(){
     it('is defined', function () {
       expect(steg.getHidingCapacity).not.toBeUndefined();
+    });
+
+    it('works with default settings', function(done) {
+      var img = new Image();
+      img.onload = function() {
+        var capacity = steg.getHidingCapacity(img);
+        expect(capacity).toEqual(18026)
+        done();
+      };
+      img.src = resources.img.cover;
     });
   });
 

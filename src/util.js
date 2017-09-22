@@ -40,7 +40,6 @@ var util = {
   "loadImg": function(url) {
     var image = new Image();
     image.src = url;
-    while(image.hasOwnProperty('complete') && !image.complete) {}
     return image;
   }
 };
