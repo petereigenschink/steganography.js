@@ -28,7 +28,6 @@
     "istanbul": "0.4.2",
     "jasmine-core": "^2.4.1",
     "jit-grunt": "^0.10.0",
-    "jquery": "2.2.2",
     "js-mock": "^0.12.0",
     "jshint-stylish": "2.1.0",
     "karma": "~0.13.15",

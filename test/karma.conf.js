@@ -15,7 +15,6 @@ module.exports = function (config) {
     // list of files / patterns to load in the browser
     files: [
       '../node_modules/js-mock/dist/js-mock.js',
-      '../node_modules/jquery/dist/jquery.js',
       '../node_modules/karma-read-json/karma-read-json.js',
       {pattern: 'js/*.js'},
       {pattern: 'spec/*.spec.js'},
