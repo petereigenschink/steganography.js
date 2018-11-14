@@ -24,8 +24,8 @@ Cover.prototype.decode = function(image, options) {
     shadowCtx = shadowCanvas.getContext('2d');
 
   shadowCanvas.style.display = 'none';
-  shadowCanvas.width = options.width || image.width;
-  shadowCanvas.height = options.width || image.height;
+  shadowCanvas.width = options.width || image.width || image.naturalWidth;
+  shadowCanvas.height = options.width || image.height || image.naturalHeight;
   if(options.height && options.width) {
     shadowCtx.drawImage(image, 0, 0, options.width, options.height );
   } else {

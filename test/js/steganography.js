@@ -1,5 +1,5 @@
 /*
- * steganography.js v1.0.3 2017-09-22
+ * steganography.js v1.0.3 2018-11-14
  *
  * Copyright (C) 2012 Peter Eigenschink (http://www.peter-eigenschink.at/)
  * Dual-licensed under MIT and Beerware license.
@@ -87,12 +87,13 @@ Cover.prototype.getHidingCapacity = function(image, options) {
   options = options || {};
   var config = this.config;
 
-  var width = options.width || image.width,
-    height = options.height || image.height,
+  var width = options.width || image.width || image.naturalWidth,
+    height = options.height || image.height || image.naturalHeight,
     t = options.t || config.t,
     codeUnitSize = options.codeUnitSize || config.codeUnitSize;
   return t*width*height/codeUnitSize >> 0;
 };
+
 Cover.prototype.encode = function(message, image, options) {
   // Handle image url
   if(image.length) {
@@ -119,8 +120,8 @@ Cover.prototype.encode = function(message, image, options) {
     shadowCtx = shadowCanvas.getContext('2d');
 
   shadowCanvas.style.display = 'none';
-  shadowCanvas.width = options.width || image.width;
-  shadowCanvas.height = options.height || image.height;
+  shadowCanvas.width = options.width || image.width || image.naturalWidth;
+  shadowCanvas.height = options.height || image.height || image.naturalHeight;
   if(options.height && options.width) {
     shadowCtx.drawImage(image, 0, 0, options.width, options.height );
   } else {
@@ -238,8 +239,8 @@ Cover.prototype.decode = function(image, options) {
     shadowCtx = shadowCanvas.getContext('2d');
 
   shadowCanvas.style.display = 'none';
-  shadowCanvas.width = options.width || image.width;
-  shadowCanvas.height = options.width || image.height;
+  shadowCanvas.width = options.width || image.width || image.naturalWidth;
+  shadowCanvas.height = options.width || image.height || image.naturalHeight;
   if(options.height && options.width) {
     shadowCtx.drawImage(image, 0, 0, options.width, options.height );
   } else {
