@@ -1,7 +1,7 @@
 /*
- * steganography.js v1.0.3 2018-11-14
+ * steganography.js v1.0.4 2018-11-14
  *
- * Copyright (C) 2012 Peter Eigenschink (http://www.peter-eigenschink.at/)
+ * Copyright (C) 2018 Peter Eigenschink (http://www.peter-eigenschink.at/) and Contributors
  * Dual-licensed under MIT and Beerware license.
 */
 ;(function (name, context, factory) {

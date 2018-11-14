@@ -7,8 +7,12 @@
     "type": "git",
     "url": "https://github.com/petereigenschink/steganography.js"
   },
-  "version": "1.0.3",
+  "version": "1.0.4",
   "license": "MIT",
+  "main": "build/steganography.min.js",
+  "files": [
+    "build/*.js"
+  ],
   "devDependencies": {
     "grunt": "^1.0.3",
     "grunt-check-dependencies": "^1.0.0",
