@@ -41,8 +41,8 @@ module.exports = function (grunt) {
   var pkg = grunt.file.readJSON('package.json');
   grunt.initConfig({
     pkg: pkg,
-    config: config,    
-    banner: '/*\n * <%= pkg.name %> v<%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>\n *\n * Copyright (C) 2012 Peter Eigenschink (http://www.peter-eigenschink.at/)\n * Dual-licensed under MIT and Beerware license.\n*/\n',
+    config: config,
+    banner: '/*\n * <%= pkg.name %> v<%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %>\n *\n * Copyright (C) 2018 Peter Eigenschink (http://www.peter-eigenschink.at/) and Contributors\n * Dual-licensed under MIT and Beerware license.\n*/\n',
 
     echo: {
       help: 'README.md'
