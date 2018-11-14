@@ -1,4 +1,4 @@
-Cover.prototype.getHidingCapacity = function(image, options) {
+Cover.prototype.getHidingCapacity = function (image, options) {
   options = options || {};
   var config = this.config;
 
@@ -6,5 +6,5 @@ Cover.prototype.getHidingCapacity = function(image, options) {
     height = options.height || image.height || image.naturalHeight,
     t = options.t || config.t,
     codeUnitSize = options.codeUnitSize || config.codeUnitSize;
-  return t*width*height/codeUnitSize >> 0;
+  return t * width * height / codeUnitSize >> 0;
 };

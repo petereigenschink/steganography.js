@@ -1,10 +1,10 @@
-Cover.prototype.decode = function(image, options) {
+Cover.prototype.decode = function (image, options) {
   // Handle image url
-  if(image.length) {
+  if (image.length) {
     image = util.loadImg(image);
-  } else if(image.src) {
+  } else if (image.src) {
     image = util.loadImg(image.src);
-  } else if(!(image instanceof HTMLImageElement)) {
+  } else if (!(image instanceof HTMLImageElement)) {
     throw new Error('IllegalInput: The input image is neither an URL string nor an image.');
   }
 
@@ -18,7 +18,7 @@ Cover.prototype.decode = function(image, options) {
     args = options.args || config.args,
     messageCompleted = options.messageCompleted || config.messageCompleted;
 
-  if(!t || t < 1 || t > 7) throw new Error('IllegalOptions: Parameter t = " + t + " is not valid: 0 < t < 8');
+  if (!t || t < 1 || t > 7) throw new Error('IllegalOptions: Parameter t = " + t + " is not valid: 0 < t < 8');
 
   var shadowCanvas = document.createElement('canvas'),
     shadowCtx = shadowCanvas.getContext('2d');
@@ -26,8 +26,8 @@ Cover.prototype.decode = function(image, options) {
   shadowCanvas.style.display = 'none';
   shadowCanvas.width = options.width || image.width || image.naturalWidth;
   shadowCanvas.height = options.width || image.height || image.naturalHeight;
-  if(options.height && options.width) {
-    shadowCtx.drawImage(image, 0, 0, options.width, options.height );
+  if (options.height && options.width) {
+    shadowCtx.drawImage(image, 0, 0, options.width, options.height);
   } else {
     shadowCtx.drawImage(image, 0, 0);
   }
@@ -39,9 +39,9 @@ Cover.prototype.decode = function(image, options) {
 
   var i, k, done;
   if (threshold === 1) {
-    for(i=3, done=false; !done && i<data.length && !done; i+=4) {
+    for (i = 3, done = false; !done && i < data.length && !done; i += 4) {
       done = messageCompleted(data, i, threshold);
-      if(!done) modMessage.push(data[i]-(255-prime+1));
+      if (!done) modMessage.push(data[i] - (255 - prime + 1));
     }
   } else {
     /*for(k = 0, done=false; !done; k+=1) {
@@ -92,17 +92,17 @@ Cover.prototype.decode = function(image, options) {
     }
   */}
 
-  var message = "", charCode = 0, bitCount = 0, mask = Math.pow(2, codeUnitSize)-1;
-  for(i = 0; i < modMessage.length; i+=1) {
+  var message = "", charCode = 0, bitCount = 0, mask = Math.pow(2, codeUnitSize) - 1;
+  for (i = 0; i < modMessage.length; i += 1) {
     charCode += modMessage[i] << bitCount;
     bitCount += t;
-    if(bitCount >= codeUnitSize) {
+    if (bitCount >= codeUnitSize) {
       message += String.fromCharCode(charCode & mask);
       bitCount %= codeUnitSize;
-      charCode = modMessage[i] >> (t-bitCount);
+      charCode = modMessage[i] >> (t - bitCount);
     }
   }
-  if(charCode !== 0) message += String.fromCharCode(charCode & mask);
+  if (charCode !== 0) message += String.fromCharCode(charCode & mask);
 
   return message;
 };
